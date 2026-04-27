@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Lazarus Sentinel app icon">
+  <title>Lazarus Sentinel</title>
+  <defs>
+    <linearGradient id="bg" x1="152" y1="108" x2="884" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#211e1a"/>
+      <stop offset="1" stop-color="#12100e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="260" y1="184" x2="784" y2="840" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e88a6e"/>
+      <stop offset="1" stop-color="#9db38e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <path d="M512 150 793 264v214c0 187-112 321-281 396-169-75-281-209-281-396V264l281-114Z" fill="#f5f1eb" opacity=".08"/>
+  <path d="M512 202 746 300v179c0 150-85 261-234 331-149-70-234-181-234-331V300l234-98Z" fill="none" stroke="url(#accent)" stroke-width="42" stroke-linejoin="round"/>
+  <path d="M383 346h129c92 0 151 55 151 139 0 58-31 105-84 127l105 152H573L480 627h-16v137h-81V346Zm81 73v139h47c44 0 69-27 69-70 0-42-25-69-69-69h-47Z" fill="#f4eee8"/>
+  <path d="M342 786h340" stroke="#d97757" stroke-width="34" stroke-linecap="round"/>
+</svg>
