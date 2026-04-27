@@ -7,10 +7,12 @@ describe('project scaffold', () => {
     const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
 
     expect(pkg.scripts).toMatchObject({
-      dev: 'electron-vite dev',
+      dev: 'npm run rebuild:electron && electron-vite dev',
       build: 'electron-vite build',
       check: 'node scripts/check.mjs',
       icons: 'python3 scripts/generate-icons.py',
+      'rebuild:electron': 'electron-rebuild -f -w better-sqlite3 -w node-pty',
+      'rebuild:node': 'npm rebuild better-sqlite3 node-pty',
       pack: 'npm run icons && npm run build && electron-builder --dir && npm rebuild better-sqlite3 node-pty',
       dist: 'npm run icons && npm run build && electron-builder && npm rebuild better-sqlite3 node-pty',
       preview: 'electron-vite preview',
@@ -66,6 +68,7 @@ describe('project scaffold', () => {
   it('provides a local readiness check script', async () => {
     const check = await readFile(new URL('../scripts/check.mjs', import.meta.url), 'utf8')
 
+    expect(check).toContain('npm run rebuild:node')
     expect(check).toContain('npm test')
     expect(check).toContain('npm run build')
     expect(check).toContain('npm audit --audit-level=high')

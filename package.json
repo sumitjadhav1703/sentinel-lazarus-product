@@ -8,10 +8,12 @@
   "type": "module",
   "main": "out/main/index.js",
   "scripts": {
-    "dev": "electron-vite dev",
+    "dev": "npm run rebuild:electron && electron-vite dev",
     "build": "electron-vite build",
     "check": "node scripts/check.mjs",
     "icons": "python3 scripts/generate-icons.py",
+    "rebuild:electron": "electron-rebuild -f -w better-sqlite3 -w node-pty",
+    "rebuild:node": "npm rebuild better-sqlite3 node-pty",
     "pack": "npm run icons && npm run build && electron-builder --dir && npm rebuild better-sqlite3 node-pty",
     "dist": "npm run icons && npm run build && electron-builder && npm rebuild better-sqlite3 node-pty",
     "preview": "electron-vite preview",

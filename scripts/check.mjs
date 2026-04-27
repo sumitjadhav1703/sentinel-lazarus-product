@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 
 const commands = [
+  { label: 'npm run rebuild:node', command: 'npm', args: ['run', 'rebuild:node'] },
   { label: 'npm test', command: 'npm', args: ['test'] },
   { label: 'npm run build', command: 'npm', args: ['run', 'build'] },
   { label: 'npm audit --audit-level=high', command: 'npm', args: ['audit', '--audit-level=high'] }
