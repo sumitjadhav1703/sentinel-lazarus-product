@@ -208,6 +208,12 @@ describe('local app data model', () => {
     expect(updated.history[0]).toMatchObject({ id: 'hist-run-1', status: 'ok', duration: '1.2s' })
   })
 
+  it('generates a secure UUID for history entries when no id is provided', () => {
+    const entry = serializeCommandHistoryEntry({ command: 'uptime' })
+    const uuidRegex = /^hist-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    expect(entry.id).toMatch(uuidRegex)
+  })
+
   it('prunes command history outside the retention window', () => {
     const rows = [
       serializeCommandHistoryEntry({ id: 'fresh', command: 'uptime', createdAt: '2026-04-26T10:00:00.000Z' }),
