@@ -14,8 +14,9 @@ export function createExecutionService({ configRepo, localBackend = null, sshBac
       if (!targetIds.length) throw new Error('At least one target is required')
 
       const servers = configRepo.getServers()
+      const targetIdSet = new Set(targetIds)
       const targets = servers
-        .filter((server) => targetIds.includes(server.id))
+        .filter((server) => targetIdSet.has(server.id))
         .map((server) => {
           const script = scriptFor(command, server.id)
           const localCapable = Boolean(localBackend?.canRun?.(server))
