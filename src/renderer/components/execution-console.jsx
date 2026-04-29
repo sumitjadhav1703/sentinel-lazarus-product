@@ -7,7 +7,10 @@ export function ExecutionConsole({ servers, selected, running, command, executio
   const [completionKey, setCompletionKey] = useState(null)
   const [cancelToken, setCancelToken] = useState(0)
   const outputLogsRef = useRef({})
-  const targets = useMemo(() => servers.filter((server) => selected.includes(server.id)), [servers, selected])
+  const targets = useMemo(() => {
+    const selectedSet = new Set(selected)
+    return servers.filter((server) => selectedSet.has(server.id))
+  }, [servers, selected])
   const plansByServer = useMemo(() => new Map((executionPlan?.targets || []).map((target) => [target.serverId, target])), [executionPlan])
 
   const onStatus = useCallback((id, status) => {
