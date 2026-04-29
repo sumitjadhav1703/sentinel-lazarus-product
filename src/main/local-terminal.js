@@ -3,7 +3,7 @@ function defaultShell() {
 }
 
 function createSessionId() {
-  return `term-${Date.now()}-${globalThis.crypto.randomUUID()}`
+  return `term-${globalThis.crypto.randomUUID()}`
 }
 
 export function createLocalTerminalBackend({
