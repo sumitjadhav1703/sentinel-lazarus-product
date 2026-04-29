@@ -3,7 +3,7 @@ function defaultShell() {
 }
 
 function createSessionId() {
-  return `term-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  return `term-${Date.now()}-${globalThis.crypto.randomUUID()}`
 }
 
 export function createLocalTerminalBackend({
