@@ -1,7 +1,7 @@
 import { finalStatusFor, scriptFor } from '../shared/execution-plan.js'
 
 function createRunId() {
-  return `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  return `run-${Date.now()}-${globalThis.crypto.randomUUID()}`
 }
 
 export function createExecutionService({ configRepo, localBackend = null, sshBackend = null, idFactory = createRunId, now = () => new Date().toISOString() }) {

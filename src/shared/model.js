@@ -51,7 +51,7 @@ export function serializeCommandHistoryEntry(entry) {
   const createdAt = entry?.createdAt || new Date().toISOString()
   const outputLogs = isPlainObject(entry?.outputLogs) ? sanitizeOutputLogs(entry.outputLogs) : null
   return {
-    id: entry?.id || `hist-${globalThis.crypto.randomUUID()}`,
+    id: entry?.id || `hist-${createdAt}-${globalThis.crypto.randomUUID()}`,
     cmd: maskCommandSecrets(String(entry?.command || entry?.cmd || '').trim()),
     targetIds,
     scope: entry?.scope || `${count} ${count === 1 ? 'server' : 'servers'}`,
