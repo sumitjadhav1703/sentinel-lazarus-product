@@ -10,6 +10,8 @@ export function resolveKeyPath(keyPath, homeDir = homedir()) {
   return value
 }
 
+const keyCache = new Map()
+
 export async function applySshAuth(config, input = {}, { readFile = fsReadFile, homeDir = homedir() } = {}) {
   if (input.authMethod === 'agent') {
     return { ...config, agent: process.env.SSH_AUTH_SOCK }
@@ -22,8 +24,17 @@ export async function applySshAuth(config, input = {}, { readFile = fsReadFile, 
   if (input.authMethod === 'key') {
     const keyPath = resolveKeyPath(input.keyPath, homeDir)
     if (!keyPath) throw new Error('Unable to read SSH key')
+
+    if (!keyCache.has(keyPath)) {
+      const readPromise = Promise.resolve(readFile(keyPath, 'utf8')).catch(err => {
+        keyCache.delete(keyPath)
+        throw err
+      })
+      keyCache.set(keyPath, readPromise)
+    }
+
     try {
-      return { ...config, privateKey: await readFile(keyPath, 'utf8') }
+      return { ...config, privateKey: await keyCache.get(keyPath) }
     } catch {
       throw new Error('Unable to read SSH key')
     }
