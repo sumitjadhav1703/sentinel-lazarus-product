@@ -18,6 +18,8 @@ const RISK_PATTERNS = [
   { re: /\bgit\s+push\s+.*--force\b/i, msg: 'Force-push', severity: 'caution', rule: 'forcePushWarnings' }
 ]
 
+const FAST_PATH_RE = new RegExp(RISK_PATTERNS.map(p => p.re.source).join('|'), 'i')
+
 export function assessRisk(command, servers = [], settings = {}) {
   const cmd = (command || '').trim()
   const reasons = []
@@ -25,6 +27,10 @@ export function assessRisk(command, servers = [], settings = {}) {
   const safetyRules = settings.safetyRules || {}
 
   if (!cmd) return { level, reasons }
+
+  if (!FAST_PATH_RE.test(cmd)) {
+    return { level, reasons }
+  }
 
   for (const pattern of RISK_PATTERNS) {
     if (pattern.rule && safetyRules[pattern.rule] === false) continue
