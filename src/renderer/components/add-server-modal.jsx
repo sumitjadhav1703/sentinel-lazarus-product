@@ -27,10 +27,6 @@ export function AddServerModal({ open, onClose, onAdd }) {
   }, [open])
 
   useEffect(() => {
-    return () => clearTimeout(testTimerRef.current)
-  }, [])
-
-  useEffect(() => {
     if (!open) return undefined
     const onKey = (event) => {
       if (event.key === 'Escape') onClose()

@@ -1,9 +1,7 @@
 import { DEFAULT_RECENT_COMMANDS, DEFAULT_SERVERS } from '../../shared/defaults.js'
-import { scriptFor } from '../../shared/execution-plan.js'
 
 export const SERVERS = DEFAULT_SERVERS
 export const RECENT_COMMANDS = DEFAULT_RECENT_COMMANDS
-export { scriptFor }
 
 const RISK_PATTERNS = [
   { re: /\brm\s+-rf?\b/i, msg: 'Recursive delete (rm -rf)', severity: 'danger', rule: 'rmRfGuard' },

@@ -7,7 +7,10 @@ export function ExecutionConsole({ servers, selected, running, command, executio
   const [completionKey, setCompletionKey] = useState(null)
   const [cancelToken, setCancelToken] = useState(0)
   const outputLogsRef = useRef({})
-  const targets = useMemo(() => servers.filter((server) => selected.includes(server.id)), [servers, selected])
+  const targets = useMemo(() => {
+    const selectedSet = new Set(selected)
+    return servers.filter((server) => selectedSet.has(server.id))
+  }, [servers, selected])
   const plansByServer = useMemo(() => new Map((executionPlan?.targets || []).map((target) => [target.serverId, target])), [executionPlan])
 
   const onStatus = useCallback((id, status) => {
@@ -27,9 +30,10 @@ export function ExecutionConsole({ servers, selected, running, command, executio
     outputLogsRef.current = {}
   }, [command, running, selected])
 
-  const ok = Object.values(statuses).filter((status) => status === 'ok').length
-  const fail = Object.values(statuses).filter((status) => status === 'fail').length
-  const cancelled = Object.values(statuses).filter((status) => status === 'cancelled').length
+  const statusValues = Object.values(statuses)
+  const ok = statusValues.filter((status) => status === 'ok').length
+  const fail = statusValues.filter((status) => status === 'fail').length
+  const cancelled = statusValues.filter((status) => status === 'cancelled').length
   const active = running && command ? Math.max(0, targets.length - ok - fail - cancelled) : 0
 
   const cancelExecution = () => {
