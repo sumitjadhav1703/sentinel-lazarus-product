@@ -1,7 +1,7 @@
 import { applySshAuth } from './ssh-auth.js'
 
 function createSessionId() {
-  return `ssh-term-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  return `ssh-term-${globalThis.crypto.randomUUID()}`
 }
 
 function normalizeSshConfig(input = {}) {

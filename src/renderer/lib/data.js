@@ -1,9 +1,7 @@
 import { DEFAULT_RECENT_COMMANDS, DEFAULT_SERVERS } from '../../shared/defaults.js'
-import { scriptFor } from '../../shared/execution-plan.js'
 
 export const SERVERS = DEFAULT_SERVERS
 export const RECENT_COMMANDS = DEFAULT_RECENT_COMMANDS
-export { scriptFor }
 
 const RISK_PATTERNS = [
   { re: /\brm\s+-rf?\b/i, msg: 'Recursive delete (rm -rf)', severity: 'danger', rule: 'rmRfGuard' },
@@ -18,6 +16,8 @@ const RISK_PATTERNS = [
   { re: /\bgit\s+push\s+.*--force\b/i, msg: 'Force-push', severity: 'caution', rule: 'forcePushWarnings' }
 ]
 
+const FAST_PATH_RE = new RegExp(RISK_PATTERNS.map(p => p.re.source).join('|'), 'i')
+
 export function assessRisk(command, servers = [], settings = {}) {
   const cmd = (command || '').trim()
   const reasons = []
@@ -25,6 +25,10 @@ export function assessRisk(command, servers = [], settings = {}) {
   const safetyRules = settings.safetyRules || {}
 
   if (!cmd) return { level, reasons }
+
+  if (!FAST_PATH_RE.test(cmd)) {
+    return { level, reasons }
+  }
 
   for (const pattern of RISK_PATTERNS) {
     if (pattern.rule && safetyRules[pattern.rule] === false) continue

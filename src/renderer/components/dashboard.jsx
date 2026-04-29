@@ -12,12 +12,16 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
     return `${server.id} ${server.host} ${server.region}`.toLowerCase().includes(query.toLowerCase())
   }), [servers, envFilter, query])
 
-  const counts = {
-    all: servers.length,
-    prod: servers.filter((server) => server.env === 'prod').length,
-    staging: servers.filter((server) => server.env === 'staging').length,
-    dev: servers.filter((server) => server.env === 'dev').length
-  }
+  const counts = useMemo(() => {
+    let prod = 0, staging = 0, dev = 0
+    for (let i = 0; i < servers.length; i++) {
+      const env = servers[i].env
+      if (env === 'prod') prod++
+      else if (env === 'staging') staging++
+      else if (env === 'dev') dev++
+    }
+    return { all: servers.length, prod, staging, dev }
+  }, [servers])
 
   const detailServer = servers.find((server) => server.id === detailId)
   const toggle = (id) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
