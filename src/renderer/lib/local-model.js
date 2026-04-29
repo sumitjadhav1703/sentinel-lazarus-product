@@ -21,13 +21,21 @@ function seededHistory() {
 export { maskCommandSecrets }
 export { normalizeServerInput, pruneHistoryByRetention, sanitizeOutputLogs, serializeCommandHistoryEntry, updateSettings }
 
+function checkArrayNormalized(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return false
+  return Boolean(arr[0] && typeof arr[0] === 'object' && arr[0].__normalized)
+}
+
 export function createInitialAppModel(overrides = {}) {
   const settings = normalizeSettings(overrides.settings)
 
+  const serversReady = checkArrayNormalized(overrides.servers)
+  const historyReady = checkArrayNormalized(overrides.history)
+
   return {
     ...overrides,
-    servers: Array.isArray(overrides.servers) ? overrides.servers.map(normalizeServerInput) : clone(SERVERS),
-    history: Array.isArray(overrides.history) ? overrides.history.map(serializeCommandHistoryEntry) : seededHistory(),
+    servers: Array.isArray(overrides.servers) ? (serversReady ? overrides.servers : overrides.servers.map(normalizeServerInput)) : clone(SERVERS),
+    history: Array.isArray(overrides.history) ? (historyReady ? overrides.history : overrides.history.map(serializeCommandHistoryEntry)) : seededHistory(),
     settings
   }
 }

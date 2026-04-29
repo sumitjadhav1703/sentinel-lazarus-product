@@ -26,10 +26,12 @@ function toId(value, fallbackHost = '') {
 }
 
 export function normalizeServerInput(input) {
+  if (input?.__normalized) return input
+
   const host = String(input?.host || '').trim()
   const id = toId(input?.id, host)
 
-  return {
+  const normalized = {
     id,
     host,
     port: toPort(input?.port),
@@ -43,14 +45,18 @@ export function normalizeServerInput(input) {
     keyPath: input?.keyPath || '',
     tags: toUniqueTags(input?.tags)
   }
+  Object.defineProperty(normalized, '__normalized', { value: true, enumerable: false })
+  return normalized
 }
 
 export function serializeCommandHistoryEntry(entry) {
+  if (entry?.__normalized) return entry
+
   const targetIds = Array.isArray(entry?.targetIds) ? entry.targetIds : []
   const count = targetIds.length
   const createdAt = entry?.createdAt || new Date().toISOString()
   const outputLogs = isPlainObject(entry?.outputLogs) ? sanitizeOutputLogs(entry.outputLogs) : null
-  return {
+  const normalized = {
     id: entry?.id || `hist-${createdAt}-${Math.random().toString(36).slice(2, 8)}`,
     cmd: maskCommandSecrets(String(entry?.command || entry?.cmd || '').trim()),
     targetIds,
@@ -61,6 +67,8 @@ export function serializeCommandHistoryEntry(entry) {
     createdAt,
     ...(outputLogs ? { outputLogs } : {})
   }
+  Object.defineProperty(normalized, '__normalized', { value: true, enumerable: false })
+  return normalized
 }
 
 export function pruneHistoryByRetention(history = [], retentionDays = 30, now = new Date()) {
