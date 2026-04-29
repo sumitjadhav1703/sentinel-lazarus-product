@@ -22,7 +22,10 @@ export function Composer({ servers, selected, settings, onCancel, onExecute }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onCancel])
 
-  const targets = useMemo(() => servers.filter((server) => selected.includes(server.id)), [servers, selected])
+  const targets = useMemo(() => {
+    const selectedSet = new Set(selected)
+    return servers.filter((server) => selectedSet.has(server.id))
+  }, [servers, selected])
   const risk = assessRisk(command, targets, settings)
   const requiredPhrase = getRequiredConfirmationPhrase(risk, targets)
   const confirmReady = isConfirmationPhraseValid(typed, requiredPhrase)

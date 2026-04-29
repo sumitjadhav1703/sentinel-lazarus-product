@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import 'xterm/css/xterm.css'
-import { scriptFor } from '../lib/data.js'
 import { EnvChip } from './chrome.jsx'
 
 export function TerminalTile({ server, command, running, cancelToken = 0, executionTarget, onStatus, onOutput }) {
@@ -121,7 +120,7 @@ export function TerminalTile({ server, command, running, cancelToken = 0, execut
     }
 
     let delay = 0
-    const steps = executionTarget?.script || scriptFor(command, server.id)
+    const steps = executionTarget?.script || []
     for (const step of steps) {
       delay += step.delay
       const timer = setTimeout(() => {
