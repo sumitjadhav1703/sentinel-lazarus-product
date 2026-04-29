@@ -108,7 +108,7 @@ function writeStoredModel(storage, model) {
   try {
     storage.setItem(APP_MODEL_STORAGE_KEY, JSON.stringify(model))
   } catch {
-    // Local persistence is best-effort until the Electron storage backend lands.
+    // Ignore persistence failures (e.g. storage quota exceeded)
   }
 }
 
