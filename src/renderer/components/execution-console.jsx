@@ -27,9 +27,10 @@ export function ExecutionConsole({ servers, selected, running, command, executio
     outputLogsRef.current = {}
   }, [command, running, selected])
 
-  const ok = Object.values(statuses).filter((status) => status === 'ok').length
-  const fail = Object.values(statuses).filter((status) => status === 'fail').length
-  const cancelled = Object.values(statuses).filter((status) => status === 'cancelled').length
+  const statusValues = Object.values(statuses)
+  const ok = statusValues.filter((status) => status === 'ok').length
+  const fail = statusValues.filter((status) => status === 'fail').length
+  const cancelled = statusValues.filter((status) => status === 'cancelled').length
   const active = running && command ? Math.max(0, targets.length - ok - fail - cancelled) : 0
 
   const cancelExecution = () => {
