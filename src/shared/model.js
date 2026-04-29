@@ -75,10 +75,28 @@ export function pruneHistoryByRetention(history = [], retentionDays = 30, now = 
   const days = Number.parseInt(retentionDays, 10)
   if (!Number.isFinite(days) || days <= 0) return Array.isArray(history) ? history : []
   const cutoff = new Date(now).getTime() - (days * 24 * 60 * 60 * 1000)
-  return (Array.isArray(history) ? history : []).filter((entry) => {
+  const arr = Array.isArray(history) ? history : []
+
+  if (arr.length === 0) return []
+
+  let left = 0
+  let right = arr.length - 1
+  let sliceIndex = 0
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2)
+    const entry = arr[mid]
     const createdAt = new Date(entry?.createdAt || entry?.created_at || 0).getTime()
-    return Number.isFinite(createdAt) && createdAt >= cutoff
-  })
+
+    if (!Number.isFinite(createdAt) || createdAt < cutoff) {
+      right = mid - 1
+    } else {
+      sliceIndex = mid + 1
+      left = mid + 1
+    }
+  }
+
+  return arr.slice(0, sliceIndex)
 }
 
 export { sanitizeOutputLogs }
