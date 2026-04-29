@@ -1,8 +1,12 @@
+const DOCKER_COMPOSE_UP_RE = /docker compose up/i
+const RM_RF_RE = /rm\s+-rf/i
+const GIT_PULL_RE = /git pull/i
+
 export function scriptFor(command, serverId) {
   const cmd = command || 'echo ok'
   const base = [{ delay: 10, line: `$ ${cmd}`, stream: 'cmd' }]
 
-  if (/docker compose up/i.test(cmd)) {
+  if (DOCKER_COMPOSE_UP_RE.test(cmd)) {
     return [
       ...base,
       { delay: 20, line: '[+] Running 3/3', stream: 'out' },
@@ -12,7 +16,7 @@ export function scriptFor(command, serverId) {
     ]
   }
 
-  if (/rm\s+-rf/i.test(cmd)) {
+  if (RM_RF_RE.test(cmd)) {
     return [
       ...base,
       { delay: 20, line: 'rm: dry-run guard intercepted destructive command', stream: 'err' },
@@ -20,7 +24,7 @@ export function scriptFor(command, serverId) {
     ]
   }
 
-  if (/git pull/i.test(cmd)) {
+  if (GIT_PULL_RE.test(cmd)) {
     return [
       ...base,
       { delay: 20, line: 'remote: Enumerating objects: 47, done.', stream: 'out' },
