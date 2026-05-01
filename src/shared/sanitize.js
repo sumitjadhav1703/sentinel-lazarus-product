@@ -1,9 +1,14 @@
+const AUTH_BEARER_RE = /(Authorization:\s*Bearer\s+)([^\s"']+)/gi
+const FLAG_SPACE_SECRET_RE = /(--(?:password|token|secret|api-key)\s+)([^\s]+)/gi
+const FLAG_EQ_SECRET_RE = /(--(?:password|token|secret|api-key)=)([^\s]+)/gi
+const ENV_EQ_SECRET_RE = /((?:password|token|secret|api_key|api-key)=)([^\s]+)/gi
+
 export function maskCommandSecrets(command) {
   return String(command || '')
-    .replace(/(Authorization:\s*Bearer\s+)([^\s"']+)/gi, '$1[secret]')
-    .replace(/(--(?:password|token|secret|api-key)\s+)([^\s]+)/gi, '$1[secret]')
-    .replace(/(--(?:password|token|secret|api-key)=)([^\s]+)/gi, '$1[secret]')
-    .replace(/((?:password|token|secret|api_key|api-key)=)([^\s]+)/gi, '$1[secret]')
+    .replace(AUTH_BEARER_RE, '$1[secret]')
+    .replace(FLAG_SPACE_SECRET_RE, '$1[secret]')
+    .replace(FLAG_EQ_SECRET_RE, '$1[secret]')
+    .replace(ENV_EQ_SECRET_RE, '$1[secret]')
 }
 
 export function sanitizeOutputLogs(outputLogs = {}, options = {}) {
