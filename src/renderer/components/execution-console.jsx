@@ -30,10 +30,14 @@ export function ExecutionConsole({ servers, selected, running, command, executio
     outputLogsRef.current = {}
   }, [command, running, selected])
 
-  const statusValues = Object.values(statuses)
-  const ok = statusValues.filter((status) => status === 'ok').length
-  const fail = statusValues.filter((status) => status === 'fail').length
-  const cancelled = statusValues.filter((status) => status === 'cancelled').length
+  let ok = 0
+  let fail = 0
+  let cancelled = 0
+  for (const status of Object.values(statuses)) {
+    if (status === 'ok') ok++
+    else if (status === 'fail') fail++
+    else if (status === 'cancelled') cancelled++
+  }
   const active = running && command ? Math.max(0, targets.length - ok - fail - cancelled) : 0
 
   const cancelExecution = () => {
