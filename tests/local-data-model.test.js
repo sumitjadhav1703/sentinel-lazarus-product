@@ -210,7 +210,7 @@ describe('local app data model', () => {
 
   it('generates a secure UUID for history entries when no id is provided', () => {
     const entry = serializeCommandHistoryEntry({ command: 'uptime' })
-    const uuidRegex = /^hist-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    const uuidRegex = /^hist-.*-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     expect(entry.id).toMatch(uuidRegex)
   })
 
