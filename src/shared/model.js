@@ -10,8 +10,20 @@ function isPlainObject(value) {
 }
 
 function toUniqueTags(value) {
-  if (Array.isArray(value)) return [...new Set(value.map((tag) => String(tag).trim()).filter(Boolean))]
-  return [...new Set(String(value || '').split(',').map((tag) => tag.trim()).filter(Boolean))]
+  const result = new Set()
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      const tag = String(value[i]).trim()
+      if (tag) result.add(tag)
+    }
+  } else {
+    const parts = String(value || '').split(',')
+    for (let i = 0; i < parts.length; i++) {
+      const tag = parts[i].trim()
+      if (tag) result.add(tag)
+    }
+  }
+  return [...result]
 }
 
 function toPort(value) {
