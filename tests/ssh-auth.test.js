@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveKeyPath } from '../src/main/ssh-auth.js'
+import { resolveKeyPath, applySshAuth } from '../src/main/ssh-auth.js'
 import { resolve, join, sep } from 'node:path'
 import { homedir } from 'node:os'
 
@@ -45,5 +45,58 @@ describe('resolveKeyPath', () => {
     const nested = '~/a/b/c/d/key'
     const expected = resolve(join(mockHome, 'a/b/c/d/key'))
     expect(resolveKeyPath(nested, mockHome)).toBe(expected)
+  })
+})
+
+describe('applySshAuth', () => {
+  const mockHome = resolve('/home/user')
+  const baseConfig = { host: 'example.com' }
+
+  it('handles agent auth method', async () => {
+    const origAuthSock = process.env.SSH_AUTH_SOCK
+    process.env.SSH_AUTH_SOCK = '/tmp/ssh-agent.sock'
+    try {
+      const result = await applySshAuth(baseConfig, { authMethod: 'agent' })
+      expect(result).toEqual({ ...baseConfig, agent: '/tmp/ssh-agent.sock' })
+    } finally {
+      process.env.SSH_AUTH_SOCK = origAuthSock
+    }
+  })
+
+  it('handles password auth method', async () => {
+    const result = await applySshAuth(baseConfig, { authMethod: 'password', password: 'secretpassword' })
+    expect(result).toEqual({ ...baseConfig, password: 'secretpassword' })
+  })
+
+  it('handles key auth method successfully', async () => {
+    const mockReadFile = async () => 'mock-private-key-content'
+    const result = await applySshAuth(
+      baseConfig,
+      { authMethod: 'key', keyPath: '~/valid_key' },
+      { readFile: mockReadFile, homeDir: mockHome }
+    )
+    expect(result).toEqual({ ...baseConfig, privateKey: 'mock-private-key-content' })
+  })
+
+  it('throws error when key file cannot be read', async () => {
+    const mockReadFile = async () => { throw new Error('File not found') }
+    await expect(applySshAuth(
+      baseConfig,
+      { authMethod: 'key', keyPath: '~/missing_key' },
+      { readFile: mockReadFile, homeDir: mockHome }
+    )).rejects.toThrow('Unable to read SSH key')
+  })
+
+  it('throws error when key path is invalid or empty', async () => {
+    await expect(applySshAuth(
+      baseConfig,
+      { authMethod: 'key', keyPath: '' },
+      { homeDir: mockHome }
+    )).rejects.toThrow('Unable to read SSH key')
+  })
+
+  it('returns unchanged config for unknown auth method', async () => {
+    const result = await applySshAuth(baseConfig, { authMethod: 'unknown' })
+    expect(result).toBe(baseConfig)
   })
 })
