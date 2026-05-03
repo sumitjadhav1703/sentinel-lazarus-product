@@ -15,13 +15,15 @@ export function createExecutionService({ configRepo, localBackend = null, sshBac
 
       const servers = configRepo.getServers()
       const targetIdSet = new Set(targetIds)
-      const targets = servers
-        .filter((server) => targetIdSet.has(server.id))
-        .map((server) => {
+      const targets = []
+
+      for (let i = 0; i < servers.length; i++) {
+        const server = servers[i]
+        if (targetIdSet.has(server.id)) {
           const script = scriptFor(command, server.id)
           const localCapable = Boolean(localBackend?.canRun?.(server))
           const sshCapable = !localCapable && Boolean(sshBackend?.canRun?.(server))
-          return {
+          targets.push({
             serverId: server.id,
             host: server.host,
             env: server.env,
@@ -30,8 +32,9 @@ export function createExecutionService({ configRepo, localBackend = null, sshBac
             executionAvailable: localCapable || sshCapable,
             status: finalStatusFor(script),
             script
-          }
-        })
+          })
+        }
+      }
 
       if (!targets.length) throw new Error('No matching targets found')
 
