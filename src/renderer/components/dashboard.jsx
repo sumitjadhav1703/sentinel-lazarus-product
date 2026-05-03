@@ -7,21 +7,20 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
   const [query, setQuery] = useState('')
   const [detailId, setDetailId] = useState(null)
 
-  const filtered = useMemo(() => servers.filter((server) => {
-    if (envFilter !== 'all' && server.env !== envFilter) return false
-    return `${server.id} ${server.host} ${server.region}`.toLowerCase().includes(query.toLowerCase())
-  }), [servers, envFilter, query])
+  const filtered = useMemo(() => {
+    const lowerQuery = query.toLowerCase()
+    return servers.filter((server) => {
+      if (envFilter !== 'all' && server.env !== envFilter) return false
+      return `${server.id} ${server.host} ${server.region}`.toLowerCase().includes(lowerQuery)
+    })
+  }, [servers, envFilter, query])
 
-  const counts = useMemo(() => {
-    let prod = 0, staging = 0, dev = 0
-    for (let i = 0; i < servers.length; i++) {
-      const env = servers[i].env
-      if (env === 'prod') prod++
-      else if (env === 'staging') staging++
-      else if (env === 'dev') dev++
-    }
-    return { all: servers.length, prod, staging, dev }
-  }, [servers])
+  const counts = useMemo(() => servers.reduce((acc, server) => {
+    if (server.env === 'prod') acc.prod++
+    else if (server.env === 'staging') acc.staging++
+    else if (server.env === 'dev') acc.dev++
+    return acc
+  }, { all: servers.length, prod: 0, staging: 0, dev: 0 }), [servers])
 
   const detailServer = servers.find((server) => server.id === detailId)
   const toggle = (id) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
