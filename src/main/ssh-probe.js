@@ -1,18 +1,9 @@
-import { applySshAuth } from './ssh-auth.js'
-
-function normalizeProbeConfig(input = {}) {
-  return {
-    host: String(input.host || '').trim(),
-    port: Number.parseInt(input.port || '22', 10) || 22,
-    username: String(input.user || input.username || '').trim(),
-    readyTimeout: 5000
-  }
-}
+import { applySshAuth, normalizeSshConfig } from './ssh-auth.js'
 
 export function createSshProbeService({ Client, readFile, homeDir } = {}) {
   return {
     async testConnection(input) {
-      let config = normalizeProbeConfig(input)
+      let config = normalizeSshConfig(input, 5000)
       if (!config.host) return Promise.resolve({ ok: false, msg: 'Host is required' })
       if (!config.username) return Promise.resolve({ ok: false, msg: 'User is required' })
 
