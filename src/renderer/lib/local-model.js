@@ -127,7 +127,6 @@ export function useLocalAppModel(storage = globalThis.localStorage, api = getBri
         const remoteModel = await api?.data?.getModel?.()
         if (!cancelled && remoteModel) dispatch({ type: 'model/replace', payload: remoteModel })
       } catch {
-        // Browser preview and early IPC failures use the renderer-local fallback.
       }
     }
 
