@@ -1,16 +1,7 @@
-import { applySshAuth } from './ssh-auth.js'
+import { applySshAuth, normalizeSshConfig } from './ssh-auth.js'
 
 function createSessionId() {
   return `ssh-term-${globalThis.crypto.randomUUID()}`
-}
-
-function normalizeSshConfig(input = {}) {
-  return {
-    host: String(input.host || '').trim(),
-    port: Number.parseInt(input.port || '22', 10) || 22,
-    username: String(input.user || input.username || '').trim(),
-    readyTimeout: 8000
-  }
 }
 
 function publicSession(session) {
@@ -41,7 +32,7 @@ export function createSshTerminalBackend({ Client, idFactory = createSessionId, 
         throw new Error('Only SSH terminal sessions are supported')
       }
 
-      let config = normalizeSshConfig(options)
+      let config = normalizeSshConfig(options, 8000)
       if (!config.host) throw new Error('Host is required')
       if (!config.username) throw new Error('User is required')
       config = await applySshAuth(config, options, { readFile, homeDir })

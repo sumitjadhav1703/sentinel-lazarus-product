@@ -2,6 +2,15 @@ import { readFile as fsReadFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, resolve, sep } from 'node:path'
 
+export function normalizeSshConfig(input = {}, defaultReadyTimeout = 5000) {
+  return {
+    host: String(input.host || '').trim(),
+    port: Number.parseInt(input.port || '22', 10) || 22,
+    username: String(input.user || input.username || '').trim(),
+    readyTimeout: defaultReadyTimeout
+  }
+}
+
 export function resolveKeyPath(keyPath, homeDir = homedir()) {
   const value = String(keyPath || '').trim()
   if (!value) return ''
