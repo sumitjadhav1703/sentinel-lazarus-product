@@ -46,7 +46,7 @@ export function AddServerModal({ open, onClose, onAdd }) {
       const result = await window.api?.ssh?.testConnection?.(form)
       setTesting(result?.ok ? 'ok' : 'fail')
     } catch {
-      testTimerRef.current = setTimeout(() => setTesting('ok'), 350)
+      setTesting('fail')
     }
   }
 
