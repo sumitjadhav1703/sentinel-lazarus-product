@@ -44,8 +44,15 @@ export function appModelReducer(state, action) {
   switch (action.type) {
     case 'servers/add': {
       const nextServer = normalizeServerInput(action.payload)
-      if (!nextServer.host || state.servers.some((server) => server.id === nextServer.id)) return state
-      return { ...state, servers: [...state.servers, nextServer] }
+      if (!nextServer.host) return state
+
+      const servers = state.servers
+      const id = nextServer.id
+      for (let i = 0; i < servers.length; i++) {
+        if (servers[i].id === id) return state
+      }
+
+      return { ...state, servers: [...servers, nextServer] }
     }
     case 'servers/update':
       return {
