@@ -175,6 +175,13 @@ describe('local app data model', () => {
     expect(maskCommandSecrets('deploy --password hunter2 --token=abcd')).toBe('deploy --password [secret] --token=[secret]')
   })
 
+  it('masks quoted inline secrets containing spaces', () => {
+    expect(maskCommandSecrets('curl --password "my super secret password" http://example.com')).toBe('curl --password [secret] http://example.com')
+    expect(maskCommandSecrets("curl --password='my super secret'")).toBe("curl --password=[secret]")
+    expect(maskCommandSecrets('export api_key="my key 123"')).toBe('export api_key=[secret]')
+    expect(maskCommandSecrets('curl -H "Authorization: Bearer \\"mytoken\\"" https://api.example.com')).toContain('Bearer [secret]"')
+  })
+
   it('stores masked history commands by default', () => {
     const next = appModelReducer(createInitialAppModel(), {
       type: 'history/record',
