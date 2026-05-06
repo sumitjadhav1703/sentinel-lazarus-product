@@ -1,7 +1,7 @@
-const AUTH_BEARER_RE = /(Authorization:\s*Bearer\s+)([^\s"']+)/gi
-const FLAG_SPACE_SECRET_RE = /(--(?:password|token|secret|api-key)\s+)([^\s]+)/gi
-const FLAG_EQ_SECRET_RE = /(--(?:password|token|secret|api-key)=)([^\s]+)/gi
-const ENV_EQ_SECRET_RE = /((?:password|token|secret|api_key|api-key)=)([^\s]+)/gi
+const AUTH_BEARER_RE = /(Authorization:\s*Bearer\s+)("[^"]*"|'[^']*'|[^\s"']+)/gi
+const FLAG_SPACE_SECRET_RE = /(--(?:password|token|secret|api-key)\s+)("[^"]*"|'[^']*'|[^\s]+)/gi
+const FLAG_EQ_SECRET_RE = /(--(?:password|token|secret|api-key)=)("[^"]*"|'[^']*'|[^\s]+)/gi
+const ENV_EQ_SECRET_RE = /((?:password|token|secret|api_key|api-key)=)("[^"]*"|'[^']*'|[^\s]+)/gi
 
 export function maskCommandSecrets(command) {
   return String(command || '')
