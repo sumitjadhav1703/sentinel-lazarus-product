@@ -72,6 +72,7 @@ export function CommandPalette({ open, onClose, onNav, onRunCommand }) {
 
   if (!open) return null
 
+  const lowerQuery = query.toLowerCase()
   const actions = [
     { label: 'Go to Servers', kind: 'nav', nav: 'dashboard' },
     { label: 'Go to Execution Console', kind: 'nav', nav: 'console' },
@@ -80,7 +81,7 @@ export function CommandPalette({ open, onClose, onNav, onRunCommand }) {
     { label: 'New multi-server command', kind: 'action', run: 'compose' },
     { label: 'Add server', kind: 'action', run: 'add-server' },
     { label: 'Toggle theme', kind: 'action', run: 'theme' }
-  ].filter((action) => action.label.toLowerCase().includes(query.toLowerCase()))
+  ].filter((action) => action.label.toLowerCase().includes(lowerQuery))
 
   return (
     <div className="palette-backdrop" onClick={onClose}>
