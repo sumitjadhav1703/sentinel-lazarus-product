@@ -1,7 +1,51 @@
 import { describe, expect, it } from 'vitest'
-import { resolveKeyPath, applySshAuth } from '../src/main/ssh-auth.js'
+import { resolveKeyPath, applySshAuth, normalizeSshConfig } from '../src/main/ssh-auth.js'
 import { resolve, join, sep } from 'node:path'
 import { homedir } from 'node:os'
+
+describe('normalizeSshConfig', () => {
+  it('returns default values for empty input', () => {
+    const result = normalizeSshConfig()
+    expect(result).toEqual({
+      host: '',
+      port: 22,
+      username: '',
+      readyTimeout: 5000
+    })
+  })
+
+  it('trims whitespace from host and username', () => {
+    const result = normalizeSshConfig({ host: '  example.com  ', username: '  admin  ' })
+    expect(result.host).toBe('example.com')
+    expect(result.username).toBe('admin')
+  })
+
+  it('parses string port to number', () => {
+    const result = normalizeSshConfig({ port: '2222' })
+    expect(result.port).toBe(2222)
+  })
+
+  it('falls back to default port 22 for invalid port strings', () => {
+    const result = normalizeSshConfig({ port: 'invalid' })
+    expect(result.port).toBe(22)
+  })
+
+  it('uses user or username field', () => {
+    const result1 = normalizeSshConfig({ user: 'user1' })
+    expect(result1.username).toBe('user1')
+
+    const result2 = normalizeSshConfig({ username: 'user2' })
+    expect(result2.username).toBe('user2')
+
+    const result3 = normalizeSshConfig({ user: 'user1', username: 'user2' })
+    expect(result3.username).toBe('user1') // user takes precedence
+  })
+
+  it('respects custom defaultReadyTimeout', () => {
+    const result = normalizeSshConfig({}, 10000)
+    expect(result.readyTimeout).toBe(10000)
+  })
+})
 
 describe('resolveKeyPath', () => {
   const mockHome = resolve('/home/user')
