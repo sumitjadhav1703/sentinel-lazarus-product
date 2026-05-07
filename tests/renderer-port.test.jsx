@@ -86,6 +86,13 @@ async function setInputValue(input, value) {
 }
 
 describe('renderer port helpers', () => {
+  it('returns safe level for empty commands or undefined', () => {
+    expect(assessRisk('')).toEqual({ level: 'safe', reasons: [] })
+    expect(assessRisk('   ')).toEqual({ level: 'safe', reasons: [] })
+    expect(assessRisk(undefined)).toEqual({ level: 'safe', reasons: [] })
+    expect(assessRisk(null)).toEqual({ level: 'safe', reasons: [] })
+  })
+
   it('marks destructive production commands as dangerous with production context', () => {
     const risk = assessRisk('rm -rf /var/log/*', prodTargets)
 
