@@ -23,7 +23,15 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
   }, { all: servers.length, prod: 0, staging: 0, dev: 0 }), [servers])
 
   const detailServer = servers.find((server) => server.id === detailId)
-  const toggle = (id) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  const toggle = (id) => setSelected((current) => {
+    const index = current.indexOf(id)
+    if (index !== -1) {
+      const next = [...current]
+      next.splice(index, 1)
+      return next
+    }
+    return [...current, id]
+  })
 
   return (
     <section className="view-scroll">
