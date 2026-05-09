@@ -60,6 +60,38 @@ export function TerminalTile({ server, command, running, cancelToken = 0, execut
   }
   resizeBackendRef.current = fitAndResizeBackend
 
+  const startTerminalSession = async (sessionState) => {
+    try {
+      const sessionOptions = { ...server, cols: 100, rows: 28 }
+      const session = executionTarget?.mode === 'ssh'
+        ? await window.api.terminal.createSsh(sessionOptions)
+        : await window.api.terminal.createLocal({ cols: 100, rows: 28 })
+      if (sessionState.cancelled) {
+        await window.api.terminal.close(session.id)
+        return
+      }
+
+      localSessionRef.current = session.id
+      fitAndResizeBackend()
+      sessionState.unsubscribe = window.api.terminal.onEvent((event) => {
+        if (event.sessionId !== session.id) return
+        if (event.type === 'data') {
+          writeTerminal(event.data, 'out')
+        }
+        if (event.type === 'exit') {
+          const nextStatus = event.exitCode === 0 ? 'ok' : 'fail'
+          setStatus(nextStatus)
+          onStatus?.(server.id, nextStatus)
+        }
+      })
+      writeTerminal(`$ ${command}\r\n`, 'cmd')
+      await window.api.terminal.write(session.id, `${command}\nexit\n`)
+    } catch {
+      setStatus('fail')
+      onStatus?.(server.id, 'fail')
+    }
+  }
+
   useEffect(() => {
     timers.current.forEach(clearTimeout)
     timers.current = []
@@ -75,46 +107,12 @@ export function TerminalTile({ server, command, running, cancelToken = 0, execut
     setStatus('running')
 
     if (['local', 'ssh'].includes(executionTarget?.mode) && executionTarget?.executionAvailable && window.api?.terminal) {
-      let cancelled = false
-      let unsubscribe = null
-
-      async function startTerminalSession() {
-        try {
-          const sessionOptions = { ...server, cols: 100, rows: 28 }
-          const session = executionTarget.mode === 'ssh'
-            ? await window.api.terminal.createSsh(sessionOptions)
-            : await window.api.terminal.createLocal({ cols: 100, rows: 28 })
-          if (cancelled) {
-            await window.api.terminal.close(session.id)
-            return
-          }
-
-          localSessionRef.current = session.id
-          fitAndResizeBackend()
-          unsubscribe = window.api.terminal.onEvent((event) => {
-            if (event.sessionId !== session.id) return
-            if (event.type === 'data') {
-              writeTerminal(event.data, 'out')
-            }
-            if (event.type === 'exit') {
-              const nextStatus = event.exitCode === 0 ? 'ok' : 'fail'
-              setStatus(nextStatus)
-              onStatus?.(server.id, nextStatus)
-            }
-          })
-          writeTerminal(`$ ${command}\r\n`, 'cmd')
-          await window.api.terminal.write(session.id, `${command}\nexit\n`)
-        } catch {
-          setStatus('fail')
-          onStatus?.(server.id, 'fail')
-        }
-      }
-
-      startTerminalSession()
+      const sessionState = { cancelled: false, unsubscribe: null }
+      startTerminalSession(sessionState)
 
       return () => {
-        cancelled = true
-        unsubscribe?.()
+        sessionState.cancelled = true
+        sessionState.unsubscribe?.()
         if (localSessionRef.current) window.api?.terminal?.close?.(localSessionRef.current).catch(() => {})
       }
     }
