@@ -131,6 +131,35 @@ describe('applySshAuth', () => {
     )).rejects.toThrow('Unable to read SSH key')
   })
 
+  it('removes rejected promise from cache so subsequent reads try again', async () => {
+    let readCalls = 0
+    const mockReadFile = async () => {
+      readCalls++
+      throw new Error('File not found')
+    }
+
+    const uniqueKeyPath = '~/unique_missing_key_for_cache_test'
+
+    // First attempt
+    await expect(applySshAuth(
+      baseConfig,
+      { authMethod: 'key', keyPath: uniqueKeyPath },
+      { readFile: mockReadFile, homeDir: mockHome }
+    )).rejects.toThrow('Unable to read SSH key')
+
+    expect(readCalls).toBe(1)
+
+    // Second attempt
+    await expect(applySshAuth(
+      baseConfig,
+      { authMethod: 'key', keyPath: uniqueKeyPath },
+      { readFile: mockReadFile, homeDir: mockHome }
+    )).rejects.toThrow('Unable to read SSH key')
+
+    // If cache was not deleted, readCalls would still be 1
+    expect(readCalls).toBe(2)
+  })
+
   it('throws error when key path is invalid or empty', async () => {
     await expect(applySshAuth(
       baseConfig,
