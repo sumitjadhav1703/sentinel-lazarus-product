@@ -21,7 +21,11 @@ export function createServerSettingsRepository(store) {
       if (!nextServer.host) return this.getServers()
 
       const servers = this.getServers()
-      if (servers.some((server) => server.id === nextServer.id)) return servers
+      const seen = new Set()
+      for (let i = 0; i < servers.length; i++) {
+        seen.add(servers[i].id)
+      }
+      if (seen.has(nextServer.id)) return servers
 
       const nextServers = [...servers, nextServer]
       store.set('servers', nextServers)
