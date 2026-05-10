@@ -118,6 +118,25 @@ describe('renderer port helpers', () => {
     expect(isConfirmationPhraseValid('confirm two prod', phrase)).toBe(false)
   })
 
+  it('handles missing or malformed server environments correctly', () => {
+    const risk = { level: 'danger' }
+
+    // Edge case: servers array has objects without env
+    expect(getRequiredConfirmationPhrase(risk, [{ id: 's1' }, { id: 's2', env: 'dev' }])).toBeNull()
+
+    // Edge case: empty servers array explicitly passed
+    expect(getRequiredConfirmationPhrase(risk, [])).toBeNull()
+
+    // Edge case: servers param omitted, relying on default parameter
+    expect(getRequiredConfirmationPhrase(risk)).toBeNull()
+
+    // Edge case: risk is safe, despite prod servers
+    expect(getRequiredConfirmationPhrase({ level: 'safe' }, prodTargets)).toBeNull()
+
+    // Edge case: risk is undefined
+    expect(getRequiredConfirmationPhrase(undefined, prodTargets)).toBeNull()
+  })
+
   it('honors disabled safety rules when assessing command risk', () => {
     const risk = assessRisk('rm -rf /srv/app', prodTargets, {
       safetyRules: {
