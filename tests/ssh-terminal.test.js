@@ -36,7 +36,7 @@ class FakeStream {
   }
 }
 
-function createFakeSshClient() {
+function createFakeSshClient({ serverFingerprint = Buffer.from('valid-fingerprint').toString('base64') } = {}) {
   const instances = []
   class FakeClient {
     constructor() {
@@ -54,7 +54,13 @@ function createFakeSshClient() {
 
     connect(config) {
       this.config = config
-      setTimeout(() => this.handlers.ready?.(), 0)
+      setTimeout(() => {
+        if (config.hostVerifier && !config.hostVerifier(Buffer.from(serverFingerprint, 'base64'))) {
+          this.handlers.error?.(new Error('Host key verification failed'))
+          return
+        }
+        this.handlers.ready?.()
+      }, 0)
     }
 
     shell(options, callback) {
@@ -191,5 +197,40 @@ describe('ssh terminal backend', () => {
 
     dispose()
     expect(ipcMain.handlers.size).toBe(0)
+  })
+
+  it('rejects terminal session if host fingerprint does not match', async () => {
+    const fake = createFakeSshClient({ serverFingerprint: Buffer.from('actual-server-key').toString('base64') })
+    const backend = createSshTerminalBackend({
+      Client: fake.Client,
+      idFactory: () => 'ssh-term-1'
+    })
+
+    await expect(backend.createSession({
+      type: 'ssh',
+      host: 'web-01.prod.lzrs.io',
+      user: 'deploy',
+      hostFingerprint: 'SHA256:different-key'
+    })).rejects.toThrow('Host key verification failed')
+    expect(fake.instances[0].ended).toBe(true)
+  })
+
+  it('accepts terminal session if host fingerprint matches', async () => {
+    const keyBase64 = Buffer.from('correct-fingerprint').toString('base64')
+    const fake = createFakeSshClient({ serverFingerprint: keyBase64 })
+    const backend = createSshTerminalBackend({
+      Client: fake.Client,
+      idFactory: () => 'ssh-term-1'
+    })
+
+    const session = await backend.createSession({
+      type: 'ssh',
+      host: 'web-01.prod.lzrs.io',
+      user: 'deploy',
+      hostFingerprint: 'SHA256:' + keyBase64
+    })
+
+    expect(session.id).toBe('ssh-term-1')
+    expect(fake.instances[0].ended).toBe(false)
   })
 })

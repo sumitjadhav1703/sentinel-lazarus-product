@@ -23,10 +23,21 @@ export function createSshProbeService({ Client, readFile, homeDir } = {}) {
           resolve(result)
         }
 
+        const connectOptions = {
+          ...config,
+          hostHash: 'sha256',
+          hostVerifier: (hashedKey) => {
+            if (!input.hostFingerprint) return true
+            const actual = hashedKey.toString('base64').replace(/=+$/, '')
+            const expected = input.hostFingerprint.replace(/^SHA256:/i, '').replace(/=+$/, '')
+            return actual === expected
+          }
+        }
+
         client
           .on('ready', () => settle({ ok: true, msg: 'Connection ready' }))
           .on('error', (error) => settle({ ok: false, msg: error?.message || 'Connection failed' }))
-          .connect(config)
+          .connect(connectOptions)
       })
     }
   }
