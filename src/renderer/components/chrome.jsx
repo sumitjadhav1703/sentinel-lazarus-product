@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IconArrowRight, IconGrid, IconHistory, IconMoon, IconPlus, IconSearch, IconServer, IconSettings, IconSun } from './icons.jsx'
 
 export function TitleBar({ theme, onToggleTheme }) {

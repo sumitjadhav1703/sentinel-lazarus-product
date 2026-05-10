@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IconPlay, IconX } from './icons.jsx'
 import { TerminalTile } from './terminal-tile.jsx'
 
