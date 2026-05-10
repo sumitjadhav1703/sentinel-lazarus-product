@@ -20,7 +20,7 @@ class FakeIpcMain {
   }
 }
 
-function createFakeClient({ fail = false } = {}) {
+function createFakeClient({ fail = false, serverFingerprint = Buffer.from('valid-fingerprint').toString('base64') } = {}) {
   const instances = []
   class FakeClient {
     constructor() {
@@ -38,8 +38,17 @@ function createFakeClient({ fail = false } = {}) {
     connect(config) {
       this.config = config
       setTimeout(() => {
-        if (fail) this.handlers.error?.(new Error('auth failed'))
-        else this.handlers.ready?.()
+        if (fail) {
+          this.handlers.error?.(new Error('auth failed'))
+          return
+        }
+
+        if (config.hostVerifier && !config.hostVerifier(Buffer.from(serverFingerprint, 'base64'))) {
+          this.handlers.error?.(new Error('Host key verification failed'))
+          return
+        }
+
+        this.handlers.ready?.()
       }, 0)
     }
 
@@ -139,5 +148,34 @@ describe('ssh probe service', () => {
 
     dispose()
     expect(ipcMain.handlers.size).toBe(0)
+  })
+
+  it('rejects connection if host fingerprint does not match', async () => {
+    const fake = createFakeClient({ serverFingerprint: Buffer.from('actual-server-key').toString('base64') })
+    const service = createSshProbeService({ Client: fake.Client })
+
+    const result = await service.testConnection({
+      host: 'web-01.prod.lzrs.io',
+      user: 'deploy',
+      hostFingerprint: 'SHA256:different-key'
+    })
+
+    expect(result).toEqual({ ok: false, msg: 'Host key verification failed' })
+    expect(fake.instances[0].ended).toBe(true)
+  })
+
+  it('accepts connection if host fingerprint matches', async () => {
+    const keyBase64 = Buffer.from('correct-fingerprint').toString('base64')
+    const fake = createFakeClient({ serverFingerprint: keyBase64 })
+    const service = createSshProbeService({ Client: fake.Client })
+
+    const result = await service.testConnection({
+      host: 'web-01.prod.lzrs.io',
+      user: 'deploy',
+      hostFingerprint: 'SHA256:' + keyBase64
+    })
+
+    expect(result).toEqual({ ok: true, msg: 'Connection ready' })
+    expect(fake.instances[0].ended).toBe(true)
   })
 })

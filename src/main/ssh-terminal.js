@@ -49,6 +49,17 @@ export function createSshTerminalBackend({ Client, idFactory = createSessionId, 
           reject(error)
         }
 
+        const connectOptions = {
+          ...config,
+          hostHash: 'sha256',
+          hostVerifier: (hashedKey) => {
+            if (!options.hostFingerprint) return true
+            const actual = hashedKey.toString('base64').replace(/=+$/, '')
+            const expected = options.hostFingerprint.replace(/^SHA256:/i, '').replace(/=+$/, '')
+            return actual === expected
+          }
+        }
+
         client
           .on('ready', () => {
             client.shell({
@@ -74,7 +85,7 @@ export function createSshTerminalBackend({ Client, idFactory = createSessionId, 
             })
           })
           .on('error', fail)
-          .connect(config)
+          .connect(connectOptions)
       })
     },
 
