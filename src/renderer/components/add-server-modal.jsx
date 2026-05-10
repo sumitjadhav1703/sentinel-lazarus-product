@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IconCheck, IconWarn, IconX } from './icons.jsx'
 
 const INITIAL_FORM = {

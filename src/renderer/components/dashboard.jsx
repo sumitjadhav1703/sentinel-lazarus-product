@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IconArrowRight, IconCheck, IconSearch, IconSettings, IconTerminal, IconX } from './icons.jsx'
 import { EnvChip, StatusBadge } from './chrome.jsx'
 

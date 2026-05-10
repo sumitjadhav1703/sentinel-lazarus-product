@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AddServerModal } from './components/add-server-modal.jsx'
 import { CommandPalette, FloatingNav, StatusBar, TitleBar } from './components/chrome.jsx'
 import { Composer } from './components/composer.jsx'

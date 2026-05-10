@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { assessRisk, getRequiredConfirmationPhrase, isConfirmationPhraseValid } from '../lib/data.js'
 import { EnvChip } from './chrome.jsx'
 import { IconArrowRight, IconPlay, IconWarn } from './icons.jsx'
