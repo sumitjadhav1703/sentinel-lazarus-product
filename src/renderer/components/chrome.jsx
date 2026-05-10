@@ -59,6 +59,16 @@ export function StatusBadge({ status }) {
   return <span className={`status-badge ${status}`}><span />{status === 'fail' ? 'failed' : status}</span>
 }
 
+const COMMAND_ACTIONS = [
+  { label: 'Go to Servers', kind: 'nav', nav: 'dashboard', lowerLabel: 'go to servers' },
+  { label: 'Go to Execution Console', kind: 'nav', nav: 'console', lowerLabel: 'go to execution console' },
+  { label: 'Go to History', kind: 'nav', nav: 'history', lowerLabel: 'go to history' },
+  { label: 'Go to Settings', kind: 'nav', nav: 'settings', lowerLabel: 'go to settings' },
+  { label: 'New multi-server command', kind: 'action', run: 'compose', lowerLabel: 'new multi-server command' },
+  { label: 'Add server', kind: 'action', run: 'add-server', lowerLabel: 'add server' },
+  { label: 'Toggle theme', kind: 'action', run: 'theme', lowerLabel: 'toggle theme' }
+]
+
 export function CommandPalette({ open, onClose, onNav, onRunCommand }) {
   const [query, setQuery] = useState('')
   const inputRef = useRef(null)
@@ -73,15 +83,7 @@ export function CommandPalette({ open, onClose, onNav, onRunCommand }) {
   if (!open) return null
 
   const lowerQuery = query.toLowerCase()
-  const actions = [
-    { label: 'Go to Servers', kind: 'nav', nav: 'dashboard' },
-    { label: 'Go to Execution Console', kind: 'nav', nav: 'console' },
-    { label: 'Go to History', kind: 'nav', nav: 'history' },
-    { label: 'Go to Settings', kind: 'nav', nav: 'settings' },
-    { label: 'New multi-server command', kind: 'action', run: 'compose' },
-    { label: 'Add server', kind: 'action', run: 'add-server' },
-    { label: 'Toggle theme', kind: 'action', run: 'theme' }
-  ].filter((action) => action.label.toLowerCase().includes(lowerQuery))
+  const actions = COMMAND_ACTIONS.filter((action) => action.lowerLabel.includes(lowerQuery))
 
   return (
     <div className="palette-backdrop" onClick={onClose}>
