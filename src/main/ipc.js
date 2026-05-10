@@ -72,17 +72,43 @@ export function registerTerminalIpcHandlers(ipcMain, { terminalBackend, onTermin
   })
 
   const handlers = {
-    [IPC_CHANNELS.createLocalTerminal]: (event, options = {}) => {
-      senders.add(event.sender)
-      return terminalBackend.createSession({ ...options, type: 'local' })
+    [IPC_CHANNELS.createLocalTerminal]: async (event, options = {}) => {
+      try {
+        senders.add(event.sender)
+        return await terminalBackend.createSession({ ...options, type: 'local' })
+      } catch (error) {
+        throw new Error(error.message)
+      }
     },
-    [IPC_CHANNELS.createSshTerminal]: (event, options = {}) => {
-      senders.add(event.sender)
-      return terminalBackend.createSession({ ...options, type: 'ssh' })
+    [IPC_CHANNELS.createSshTerminal]: async (event, options = {}) => {
+      try {
+        senders.add(event.sender)
+        return await terminalBackend.createSession({ ...options, type: 'ssh' })
+      } catch (error) {
+        throw new Error(error.message)
+      }
     },
-    [IPC_CHANNELS.writeTerminal]: (_event, { id, data }) => terminalBackend.write(id, data),
-    [IPC_CHANNELS.resizeTerminal]: (_event, { id, cols, rows }) => terminalBackend.resize(id, cols, rows),
-    [IPC_CHANNELS.closeTerminal]: (_event, { id }) => terminalBackend.close(id)
+    [IPC_CHANNELS.writeTerminal]: async (_event, { id, data }) => {
+      try {
+        return await terminalBackend.write(id, data)
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    },
+    [IPC_CHANNELS.resizeTerminal]: async (_event, { id, cols, rows }) => {
+      try {
+        return await terminalBackend.resize(id, cols, rows)
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    },
+    [IPC_CHANNELS.closeTerminal]: async (_event, { id }) => {
+      try {
+        return await terminalBackend.close(id)
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    }
   }
 
   for (const [channel, handler] of Object.entries(handlers)) {
