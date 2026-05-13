@@ -1,5 +1,11 @@
-🎯 **What:** The `applySshAuth` key caching functionality was missing a test for its error branch. Specifically, when `readFile` throws an error or rejects, the code wraps this error in a `catch` block that calls `keyCache.delete` so the rejected promise isn't cached indefinitely. This was untested and caused a gap in line coverage for `keyCache.delete`.
+🎯 **What:** The `AddServerModal` React component in `src/renderer/components/add-server-modal.jsx` was untested. This PR adds a comprehensive test suite using Vitest and `react-dom/client` `createRoot` rendering logic that follows existing testing conventions in the codebase.
 
-📊 **Coverage:** A new test has been added to cover the scenario where `applySshAuth` encounters an error reading the SSH key. The test verifies that `readFile` is called again on subsequent requests for the same key path, effectively confirming that the rejected promise was removed from the cache (`keyCache.delete`). The coverage for `src/main/ssh-auth.js` has now reached 100%.
+📊 **Coverage:** The new test suite covers:
+- Rendering the modal when `open` is true, and rendering nothing when closed.
+- Handling form updates correctly, verifying that state aligns with inputs.
+- Validating the form to ensure the "Add server" button is disabled if `id` or `host` is empty.
+- Calling the `window.api.ssh.testConnection` IPC mock on successful and failed tests, and updating the probe status button text appropriately.
+- Firing the `onAdd` callback correctly when the "Add server" button is clicked.
+- Calling `onClose` appropriately when the "Cancel" button, close icon, or Escape key is triggered.
 
-✨ **Result:** Test coverage for `src/main/ssh-auth.js` is improved to 100%, and the key cache failure resilience feature is now protected against regressions.
+✨ **Result:** Enhanced the reliability and maintainability of the application by ensuring the critical `AddServerModal` component's behavior logic is now thoroughly verified and regressions will be caught by `npm run check`.

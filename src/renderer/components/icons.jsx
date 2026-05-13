@@ -1,3 +1,4 @@
+import React from 'react'
 const Icon = ({ children, size = 16, stroke = 'currentColor', sw = 1.6, fill = 'none', ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
     {children}
