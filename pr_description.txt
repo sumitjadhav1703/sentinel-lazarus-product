@@ -1,5 +1,10 @@
-🎯 **What:** The `applySshAuth` key caching functionality was missing a test for its error branch. Specifically, when `readFile` throws an error or rejects, the code wraps this error in a `catch` block that calls `keyCache.delete` so the rejected promise isn't cached indefinitely. This was untested and caused a gap in line coverage for `keyCache.delete`.
+🎯 **What:** The pure React functional component `FloatingNav` within `src/renderer/components/chrome.jsx` was untested, leaving a critical portion of the primary application navigation unverified.
 
-📊 **Coverage:** A new test has been added to cover the scenario where `applySshAuth` encounters an error reading the SSH key. The test verifies that `readFile` is called again on subsequent requests for the same key path, effectively confirming that the rejected promise was removed from the cache (`keyCache.delete`). The coverage for `src/main/ssh-auth.js` has now reached 100%.
+📊 **Coverage:** Added a comprehensive suite of jsdom-based unit tests for `FloatingNav` in `tests/chrome.test.jsx`. The tests now verify:
+- Accurate rendering of the correct navigation items ("Servers", "Console", "History", "Settings").
+- The proper assignment of the `.active` class based on the currently selected `view` prop.
+- The `setView` handler triggers correctly when navigating.
+- The `selectedCount` badge appears properly on the "Console" item when servers are active, and is absent when the count is zero or null.
+- Correct execution of the `onAddServer` and `onToggleTheme` prop functions.
 
-✨ **Result:** Test coverage for `src/main/ssh-auth.js` is improved to 100%, and the key cache failure resilience feature is now protected against regressions.
+✨ **Result:** Test coverage significantly increased for the core UI shell. Future refactoring of the FloatingNav or additions of new navigation items can now be verified deterministically against regressions.
