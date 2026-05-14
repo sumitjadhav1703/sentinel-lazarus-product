@@ -1,5 +1,0 @@
-🎯 **What:** The `applySshAuth` key caching functionality was missing a test for its error branch. Specifically, when `readFile` throws an error or rejects, the code wraps this error in a `catch` block that calls `keyCache.delete` so the rejected promise isn't cached indefinitely. This was untested and caused a gap in line coverage for `keyCache.delete`.
-
-📊 **Coverage:** A new test has been added to cover the scenario where `applySshAuth` encounters an error reading the SSH key. The test verifies that `readFile` is called again on subsequent requests for the same key path, effectively confirming that the rejected promise was removed from the cache (`keyCache.delete`). The coverage for `src/main/ssh-auth.js` has now reached 100%.
-
-✨ **Result:** Test coverage for `src/main/ssh-auth.js` is improved to 100%, and the key cache failure resilience feature is now protected against regressions.
