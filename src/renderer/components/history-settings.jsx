@@ -1,3 +1,4 @@
+import React from 'react'
 import { StatusBadge } from './chrome.jsx'
 
 export function HistoryView({ history }) {
