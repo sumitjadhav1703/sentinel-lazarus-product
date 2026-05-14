@@ -1,3 +1,4 @@
+import { safeStorage } from 'electron'
 import { DEFAULT_SERVERS } from '../shared/defaults.js'
 import { normalizeServerInput, normalizeSettings, updateSettings } from '../shared/model.js'
 
@@ -10,10 +11,37 @@ function readArray(store, key, fallback) {
   return Array.isArray(value) ? value : clone(fallback)
 }
 
+function readServers(store) {
+  const value = store.get('servers')
+  if (typeof value === 'string' && safeStorage?.isEncryptionAvailable?.()) {
+    try {
+      const decrypted = safeStorage.decryptString(Buffer.from(value, 'base64'))
+      const parsed = JSON.parse(decrypted)
+      if (Array.isArray(parsed)) return parsed
+    } catch {
+      // fallback to default
+    }
+  }
+  return Array.isArray(value) ? value : clone(DEFAULT_SERVERS)
+}
+
+function writeServers(store, servers) {
+  if (safeStorage?.isEncryptionAvailable?.()) {
+    try {
+      const encrypted = safeStorage.encryptString(JSON.stringify(servers))
+      store.set('servers', encrypted.toString('base64'))
+      return
+    } catch {
+      // fallback to plain text if encryption fails
+    }
+  }
+  store.set('servers', servers)
+}
+
 export function createServerSettingsRepository(store) {
   return {
     getServers() {
-      return readArray(store, 'servers', DEFAULT_SERVERS).map(normalizeServerInput)
+      return readServers(store).map(normalizeServerInput)
     },
 
     addServer(input) {
@@ -28,7 +56,7 @@ export function createServerSettingsRepository(store) {
       if (seen.has(nextServer.id)) return servers
 
       const nextServers = [...servers, nextServer]
-      store.set('servers', nextServers)
+      writeServers(store, nextServers)
       return nextServers
     },
 
@@ -38,13 +66,13 @@ export function createServerSettingsRepository(store) {
         if (server.id !== id) return server
         return normalizeServerInput({ ...server, ...(patch || {}), id: server.id })
       })
-      store.set('servers', nextServers)
+      writeServers(store, nextServers)
       return nextServers
     },
 
     removeServer(id) {
       const nextServers = this.getServers().filter((server) => server.id !== id)
-      store.set('servers', nextServers)
+      writeServers(store, nextServers)
       return nextServers
     },
 
