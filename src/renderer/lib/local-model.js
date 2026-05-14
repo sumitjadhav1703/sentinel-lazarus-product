@@ -48,9 +48,7 @@ export function appModelReducer(state, action) {
 
       const servers = state.servers
       const id = nextServer.id
-      for (let i = 0; i < servers.length; i++) {
-        if (servers[i].id === id) return state
-      }
+      if (servers.some(s => s.id === id)) return state
 
       return { ...state, servers: [...servers, nextServer] }
     }
