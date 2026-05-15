@@ -161,4 +161,38 @@ describe('local terminal backend', () => {
     expect(channels).toContain('terminal:create-ssh')
     expect(channels).not.toContain('ssh:create-session')
   })
+
+  it('filters sensitive variables from process.env when creating a session', () => {
+    const fakePty = createFakePty()
+    const backend = createLocalTerminalBackend({
+      pty: fakePty,
+      idFactory: () => 'term-1'
+    })
+
+    const originalEnv = process.env
+    process.env = {
+      PATH: '/usr/bin',
+      HOME: '/home/user',
+      SSH_AUTH_SOCK: '/tmp/ssh-xxx',
+      AWS_ACCESS_KEY_ID: 'AKIA...',
+      GITHUB_TOKEN: 'ghp_...',
+      DB_PASSWORD: 'password123',
+      APPLE_ID: 'dev@apple.com',
+      ELECTRON_RUN_AS_NODE: '1',
+      NORMAL_VAR: 'hello'
+    }
+
+    try {
+      backend.createSession({ cols: 80, rows: 24 })
+
+      expect(fakePty.spawns[0].options.env).toEqual({
+        PATH: '/usr/bin',
+        HOME: '/home/user',
+        SSH_AUTH_SOCK: '/tmp/ssh-xxx',
+        NORMAL_VAR: 'hello'
+      })
+    } finally {
+      process.env = originalEnv
+    }
+  })
 })
