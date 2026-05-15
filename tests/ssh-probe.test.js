@@ -1,6 +1,27 @@
-import { describe, expect, it } from 'vitest'
-import { createSshProbeService } from '../src/main/ssh-probe.js'
+import { describe, expect, it, vi } from 'vitest'
+import { createSshProbeService, createSsh2ProbeService } from '../src/main/ssh-probe.js'
 import { IPC_CHANNELS, registerSshProbeIpcHandlers } from '../src/main/ipc.js'
+
+let mockSsh2Config = null
+vi.mock('ssh2', () => {
+  class MockRealClient {
+    constructor() {
+      this.handlers = {}
+    }
+    on(event, handler) {
+      this.handlers[event] = handler
+      return this
+    }
+    connect(config) {
+      mockSsh2Config = config
+      setTimeout(() => this.handlers.ready?.(), 0)
+    }
+    end() {}
+  }
+  return {
+    Client: MockRealClient
+  }
+})
 
 class FakeIpcMain {
   constructor() {
@@ -177,5 +198,23 @@ describe('ssh probe service', () => {
 
     expect(result).toEqual({ ok: true, msg: 'Connection ready' })
     expect(fake.instances[0].ended).toBe(true)
+  })
+
+  describe('createSsh2ProbeService', () => {
+    it('creates a service using the dynamically imported ssh2 Client', async () => {
+      const service = await createSsh2ProbeService()
+      expect(typeof service.testConnection).toBe('function')
+
+      mockSsh2Config = null
+      const result = await service.testConnection({
+        host: 'web-01.prod.lzrs.io',
+        user: 'deploy'
+      })
+
+      expect(result).toEqual({ ok: true, msg: 'Connection ready' })
+      expect(mockSsh2Config).toMatchObject({
+        host: 'web-01.prod.lzrs.io'
+      })
+    })
   })
 })
