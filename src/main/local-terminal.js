@@ -1,3 +1,17 @@
+
+const SENSITIVE_ENV_RE = /SECRET|KEY|TOKEN|PASSWORD|PASS(?:WD)?|AUTH|CREDENTIAL|APPLE_|ELECTRON_|CSC_/i
+const EXPLICITLY_ALLOWED_ENV = ['SSH_AUTH_SOCK']
+
+function createSafeEnv(env = {}) {
+  const safeEnv = {}
+  for (const [key, value] of Object.entries(env)) {
+    if (EXPLICITLY_ALLOWED_ENV.includes(key) || !SENSITIVE_ENV_RE.test(key)) {
+      safeEnv[key] = value
+    }
+  }
+  return safeEnv
+}
+
 function defaultShell() {
   return process.env.SHELL || (process.platform === 'win32' ? 'powershell.exe' : '/bin/sh')
 }
@@ -37,7 +51,7 @@ export function createLocalTerminalBackend({
         cols: options.cols || 80,
         rows: options.rows || 24,
         cwd,
-        env: process.env
+        env: createSafeEnv(process.env)
       })
       const session = { id, type: 'local', shell, process: proc }
       sessions.set(id, session)
