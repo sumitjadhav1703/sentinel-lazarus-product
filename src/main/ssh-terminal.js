@@ -60,30 +60,32 @@ export function createSshTerminalBackend({ Client, idFactory = createSessionId, 
           }
         }
 
-        client
-          .on('ready', () => {
-            client.shell({
-              term: 'xterm-256color',
-              cols: options.cols || 80,
-              rows: options.rows || 24
-            }, (error, stream) => {
-              if (error) {
-                fail(error)
-                return
-              }
+        function onReady() {
+          client.shell({
+            term: 'xterm-256color',
+            cols: options.cols || 80,
+            rows: options.rows || 24
+          }, (error, stream) => {
+            if (error) {
+              fail(error)
+              return
+            }
 
-              const session = { id, host: config.host, client, stream }
-              sessions.set(id, session)
-              stream.on('data', (data) => emit({ sessionId: id, type: 'data', data: String(data) }))
-              stream.on('close', (exitCode = 0) => {
-                sessions.delete(id)
-                client.end()
-                emit({ sessionId: id, type: 'exit', exitCode })
-              })
-              settled = true
-              resolve(publicSession(session))
+            const session = { id, host: config.host, client, stream }
+            sessions.set(id, session)
+            stream.on('data', (data) => emit({ sessionId: id, type: 'data', data: String(data) }))
+            stream.on('close', (exitCode = 0) => {
+              sessions.delete(id)
+              client.end()
+              emit({ sessionId: id, type: 'exit', exitCode })
             })
+            settled = true
+            resolve(publicSession(session))
           })
+        }
+
+        client
+          .on('ready', onReady)
           .on('error', fail)
           .connect(connectOptions)
       })
