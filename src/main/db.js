@@ -21,8 +21,7 @@ function toHistoryRow(row) {
   }
 }
 
-export function createHistoryDatabase(databasePath) {
-  const db = new Database(databasePath)
+function setupHistoryDatabase(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS command_history (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +41,9 @@ export function createHistoryDatabase(databasePath) {
   if (!columns.includes('output_logs')) {
     db.exec('ALTER TABLE command_history ADD COLUMN output_logs TEXT')
   }
+}
 
+function createHistoryRepository(db) {
   const insert = db.prepare(`
     INSERT INTO command_history (cmd, target_ids, scope, status, duration, ts, created_at, output_logs)
     VALUES (@cmd, @targetIds, @scope, @status, @duration, @ts, @createdAt, @outputLogs)
@@ -106,4 +107,10 @@ export function createHistoryDatabase(databasePath) {
       db.close()
     }
   }
+}
+
+export function createHistoryDatabase(databasePath) {
+  const db = new Database(databasePath)
+  setupHistoryDatabase(db)
+  return createHistoryRepository(db)
 }
