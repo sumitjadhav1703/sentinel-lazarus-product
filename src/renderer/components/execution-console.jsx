@@ -34,7 +34,8 @@ export function ExecutionConsole({ servers, selected, running, command, executio
   let ok = 0
   let fail = 0
   let cancelled = 0
-  for (const status of Object.values(statuses)) {
+  for (const key in statuses) {
+    const status = statuses[key]
     if (status === 'ok') ok++
     else if (status === 'fail') fail++
     else if (status === 'cancelled') cancelled++
