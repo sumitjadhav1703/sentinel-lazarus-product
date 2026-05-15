@@ -37,5 +37,10 @@ export function scriptFor(command, serverId) {
 }
 
 export function finalStatusFor(script) {
-  return [...script].reverse().find((step) => step.status)?.status || 'ok'
+  for (let i = script.length - 1; i >= 0; i--) {
+    if (script[i].status) {
+      return script[i].status
+    }
+  }
+  return 'ok'
 }
