@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { vi } from 'vitest'
 import { createSshTerminalBackend } from '../src/main/ssh-terminal.js'
 import { IPC_CHANNELS, registerTerminalIpcHandlers } from '../src/main/ipc.js'
 
@@ -232,5 +233,37 @@ describe('ssh terminal backend', () => {
 
     expect(session.id).toBe('ssh-term-1')
     expect(fake.instances[0].ended).toBe(false)
+  })
+})
+
+describe('createSsh2TerminalBackend', () => {
+  it('wraps createSshTerminalBackend with dynamic ssh2 client', async () => {
+    let mockClientInstantiated = false
+    vi.doMock('ssh2', () => ({
+      Client: class MockClient {
+        constructor() { mockClientInstantiated = true }
+        on() { return this }
+        connect() { }
+      }
+    }))
+
+    const { createSsh2TerminalBackend } = await import('../src/main/ssh-terminal.js')
+
+    const backend = await createSsh2TerminalBackend({
+      idFactory: () => 'test-1'
+    })
+
+    // Trigger dynamic import inside createSsh2TerminalBackend
+    backend.createSession({
+      type: 'ssh',
+      host: 'localhost',
+      user: 'test'
+    }).catch(() => {})
+
+    await new Promise(r => setTimeout(r, 10))
+
+    expect(mockClientInstantiated).toBe(true)
+
+    vi.doUnmock('ssh2')
   })
 })
