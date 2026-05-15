@@ -39,9 +39,18 @@ function writeServers(store, servers) {
 }
 
 export function createServerSettingsRepository(store) {
+  let cachedServersRaw = null
+  let cachedServersNormalized = null
+
   return {
     getServers() {
-      return readServers(store).map(normalizeServerInput)
+      const currentRaw = readServers(store)
+      if (currentRaw === cachedServersRaw) {
+        return cachedServersNormalized
+      }
+      cachedServersRaw = currentRaw
+      cachedServersNormalized = currentRaw.map(normalizeServerInput)
+      return cachedServersNormalized
     },
 
     addServer(input) {
