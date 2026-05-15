@@ -31,8 +31,8 @@ function writeServers(store, servers) {
       const encrypted = safeStorage.encryptString(JSON.stringify(servers))
       store.set('servers', encrypted.toString('base64'))
       return
-    } catch {
-      // fallback to plain text if encryption fails
+    } catch (err) {
+      throw new Error('Encryption failed: ' + err.message)
     }
   }
   store.set('servers', servers)
