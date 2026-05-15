@@ -12,6 +12,7 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
     const lowerQuery = query.toLowerCase()
     return servers.filter((server) => {
       if (envFilter !== 'all' && server.env !== envFilter) return false
+      if (server.__search) return server.__search.includes(lowerQuery)
       return `${server.id} ${server.host} ${server.region}`.toLowerCase().includes(lowerQuery)
     })
   }, [servers, envFilter, query])

@@ -58,6 +58,7 @@ export function normalizeServerInput(input) {
     tags: toUniqueTags(input?.tags)
   }
   Object.defineProperty(normalized, '__normalized', { value: true, enumerable: false })
+  Object.defineProperty(normalized, '__search', { value: `${id} ${host} ${normalized.region}`.toLowerCase(), enumerable: false })
   return normalized
 }
 
