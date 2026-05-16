@@ -2,6 +2,7 @@ import React from 'react'
 import { useMemo, useState } from 'react'
 import { IconArrowRight, IconCheck, IconSearch, IconSettings, IconTerminal, IconX } from './icons.jsx'
 import { EnvChip, StatusBadge } from './chrome.jsx'
+import { Segment } from './segment.jsx'
 
 export function Dashboard({ servers, recentCommands, selected, setSelected, onOpenTerminal, onCompose, onUpdateServer, onRemoveServer }) {
   const [envFilter, setEnvFilter] = useState('all')
@@ -173,13 +174,6 @@ function Input({ ariaLabel, value, onChange }) {
   return <input aria-label={ariaLabel} className="mono" value={value} onChange={(event) => onChange(event.target.value)} />
 }
 
-function Segment({ options, value, onChange }) {
-  return (
-    <div className="segment">
-      {options.map((option) => <button key={option} className={value === option ? 'active' : ''} onClick={() => onChange(option)}>{option}</button>)}
-    </div>
-  )
-}
 
 function LoadBar({ value }) {
   const pct = Math.min(1, value)

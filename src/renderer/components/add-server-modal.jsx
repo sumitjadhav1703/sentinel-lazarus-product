@@ -1,6 +1,7 @@
 import React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { IconCheck, IconWarn, IconX } from './icons.jsx'
+import { Segment } from './segment.jsx'
 
 const INITIAL_FORM = {
   id: '',
@@ -95,10 +96,3 @@ function Input({ value, onChange, placeholder }) {
   return <input className="mono" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
 }
 
-function Segment({ options, value, onChange }) {
-  return (
-    <div className="segment">
-      {options.map((option) => <button key={option} className={value === option ? 'active' : ''} onClick={() => onChange(option)}>{option}</button>)}
-    </div>
-  )
-}
