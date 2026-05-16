@@ -11,8 +11,7 @@ function readArray(store, key, fallback) {
   return Array.isArray(value) ? value : clone(fallback)
 }
 
-function readServers(store) {
-  const value = store.get('servers')
+function parseServersValue(value) {
   if (typeof value === 'string' && safeStorage?.isEncryptionAvailable?.()) {
     try {
       const decrypted = safeStorage.decryptString(Buffer.from(value, 'base64'))
@@ -39,16 +38,20 @@ function writeServers(store, servers) {
 }
 
 export function createServerSettingsRepository(store) {
-  let cachedServersRaw = null
+  let cachedStoreValue = undefined // Use undefined so null can be a valid store value initially
   let cachedServersNormalized = null
+  let isCached = false
 
   return {
     getServers() {
-      const currentRaw = readServers(store)
-      if (currentRaw === cachedServersRaw) {
+      const storeValue = store.get('servers')
+      if (isCached && storeValue === cachedStoreValue) {
         return cachedServersNormalized
       }
-      cachedServersRaw = currentRaw
+      cachedStoreValue = storeValue
+      isCached = true
+
+      const currentRaw = parseServersValue(storeValue)
       cachedServersNormalized = currentRaw.map(normalizeServerInput)
       return cachedServersNormalized
     },
