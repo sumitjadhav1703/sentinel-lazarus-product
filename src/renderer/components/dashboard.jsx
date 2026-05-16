@@ -70,9 +70,11 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
         <div className="table-head">
           <span /><span>Host</span><span>Environment</span><span>Region / User</span><span>Uptime</span><span>Load</span><span />
         </div>
-        {filtered.map((server) => {
-          const isSelected = selected.includes(server.id)
-          return (
+        {(() => {
+          const selectedSet = new Set(selected);
+          return filtered.map((server) => {
+            const isSelected = selectedSet.has(server.id)
+            return (
             <div key={server.id} className={`server-row ${isSelected ? 'selected' : ''}`} onClick={() => toggle(server.id)}>
               <span className="checkbox">{isSelected ? <IconCheck size={11} sw={2.5} /> : null}</span>
               <span><b className="mono">{server.host}</b><small className="mono">{server.id}</small></span>
@@ -86,7 +88,7 @@ export function Dashboard({ servers, recentCommands, selected, setSelected, onOp
               </span>
             </div>
           )
-        })}
+        })})()}
       </div>
 
       {detailServer ? (
