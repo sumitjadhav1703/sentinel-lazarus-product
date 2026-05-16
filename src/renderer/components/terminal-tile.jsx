@@ -36,10 +36,18 @@ export function TerminalTile({ server, command, running, cancelToken = 0, execut
     terminalRef.current = terminal
     fitRef.current = fitAddon
 
-    const onResize = () => resizeBackendRef.current()
+    let timeout;
+    const onResize = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        resizeBackendRef.current()
+      }, 100);
+    };
+
     window.addEventListener('resize', onResize)
     return () => {
       window.removeEventListener('resize', onResize)
+      clearTimeout(timeout);
       terminal.dispose()
       terminalRef.current = null
       fitRef.current = null
